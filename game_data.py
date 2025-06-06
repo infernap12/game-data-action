@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 
 import requests
@@ -14,6 +15,7 @@ proto = Subprotocol('v1.json.spacetimedb')
 
 def dump_tables(host, module, queries, auth=None):
     save_data = {}
+    new_queries = None
     if isinstance(queries, str):
         queries = [queries]
     try:
@@ -44,8 +46,22 @@ def dump_tables(host, module, queries, auth=None):
                         rows = table['updates'][0]['inserts']
                         save_data[name] = [json.loads(row) for row in rows]
                     break
+                elif 'TransactionUpdate' in data and 'Failed' in data['TransactionUpdate']['status']:
+                    failure = data['TransactionUpdate']['status']['Failed']
+                    if bad_table := re.match(r'`(\w*)` is not a valid table', failure):
+                        bad_table = bad_table.group(1)
+                        print('Invalid table, skipping and retrying: ' + bad_table)
+                        new_queries = [
+                            q for q in queries
+                            if (isinstance(q, str) and q != bad_table)
+                            or (isinstance(q, tuple) and q[0] != bad_table)
+                        ]
+                    break
     except WebSocketException as ex:
         raise ex
+
+    if new_queries:
+        return dump_tables(host, module, new_queries, auth=auth)
 
     return save_data
 
