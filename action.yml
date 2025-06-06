@@ -3,10 +3,13 @@ description: 'Fetches BitCraft game data (desc tables, etc) from STDB and saves 
 inputs:
   data-dir:
     required: true
+    description: Root directory to put files in
   bitcraft-spacetime-host:
     required: true
+    description: Hostname of bitcraft-global module
   stdb-auth:
     required: false
+    description: Auth header value, anonymous if not provided
 runs:
   using: "composite"
   steps:
@@ -14,6 +17,8 @@ runs:
       with:
         python-version: '3.13'
     - run: python -m pip install -r ${{ github.action_path }}/requirements.txt
+      shell: bash
+    - run: rm -rf "${{ inputs.data-dir}}"/*
       shell: bash
     - run: python ${{ github.action_path }}/game_data.py
       shell: bash
