@@ -100,6 +100,11 @@ def main():
         raise ValueError('BITCRAFT_SPACETIME_HOST not set')
     auth = os.getenv('BITCRAFT_SPACETIME_AUTH') or None
 
+    schema_glb = get_schema(global_host, 'bitcraft-global')
+    if schema_glb:
+        with open(data_dir / 'global_schema.json', 'w') as f:
+            json.dump(schema_glb, fp=f, indent=2)
+
     region_host, region_module = get_region_info(global_host, auth)
 
     schema = get_schema(region_host, region_module)
