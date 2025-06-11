@@ -10,6 +10,10 @@ inputs:
   stdb-auth:
     required: false
     description: Auth header value, anonymous if not provided
+outputs:
+  updated_data:
+    description: true if something was updated
+    value: ${{ steps.game-data.outputs.updated_data }}
 runs:
   using: "composite"
   steps:
@@ -21,6 +25,7 @@ runs:
     - run: rm -rf "${{ inputs.data-dir}}"/*
       shell: bash
     - run: python ${{ github.action_path }}/game_data.py
+      id: game-data
       shell: bash
       env:
         DATA_DIR: ${{ inputs.data-dir }}

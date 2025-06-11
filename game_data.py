@@ -89,7 +89,6 @@ def save_tables(data_dir, subdir, tables):
     for name, data in tables.items():
         with open(root / (name + '.json'), 'w') as f:
             json.dump(data, fp=f, indent=2)
-    pass
 
 
 def main():
@@ -123,6 +122,13 @@ def main():
     if region_tables:
         region_res = dump_tables(region_host, region_module, region_tables, auth)
         save_tables(data_dir, 'region', region_res)
+
+    # exceptions get raised all the way, so if we're here, it should be successful
+    # of course, if the tables were actually emptied on the DB, we'll get a bunch of blanks
+    # but as long as it wasn't due to outages or whatever, that's an acceptable diff
+    if gho := os.getenv('GITHUB_OUTPUT'):
+        with open(gho, 'a') as f:
+            f.write(f'updated_data=true')
 
 
 if __name__ == '__main__':
