@@ -86,7 +86,13 @@ def get_region_info(global_host, auth):
 def save_tables(data_dir, subdir, tables):
     root = data_dir / subdir
     root.mkdir(exist_ok=True)
+
+    def _get_sort(x):
+        # incredibly ugly but ok
+        return x.get('id', x.get('item_id', x.get('building_id', x.get('name', x.get('cargo_id', x.get('type_id', -1))))))
+
     for name, data in tables.items():
+        data = sorted(data, key=_get_sort)
         with open(root / (name + '.json'), 'w') as f:
             json.dump(data, fp=f, indent=2)
 
