@@ -54,7 +54,7 @@ def dump_tables(host, module, queries, auth=None):
                         new_queries = [
                             q for q in queries
                             if (isinstance(q, str) and q != bad_table)
-                            or (isinstance(q, tuple) and q[0] != bad_table)
+                               or (isinstance(q, tuple) and q[0] != bad_table)
                         ]
                     break
     except WebSocketException as ex:
@@ -97,6 +97,15 @@ def save_tables(data_dir, subdir, tables):
             json.dump(data, fp=f, indent=2)
 
 
+def table_names_to_file(schema_glb, table_file):
+    tables = schema_glb.get("tables", [])
+    tables = {t['name']: 'Public' in t['table_access'] for t in tables}
+    public = [k for k, v in tables.items() if v]
+    private = [k for k, v in tables.items() if not v]
+    with open(table_file, 'w') as f:
+        json.dump(dict(public=public, private=private), fp=f, indent=2)
+
+
 def main():
     data_dir = Path(os.getenv('DATA_DIR') or 'server')
     data_dir.mkdir(exist_ok=True)
@@ -109,6 +118,8 @@ def main():
     if schema_glb:
         with open(data_dir / 'global_schema.json', 'w') as f:
             json.dump(schema_glb, fp=f, indent=2)
+        table_file = data_dir / 'global_tables.json'
+        table_names_to_file(schema_glb, table_file)
 
     region_host, region_module = get_region_info(global_host, auth)
 
@@ -116,6 +127,8 @@ def main():
     if schema:
         with open(data_dir / 'schema.json', 'w') as f:
             json.dump(schema, fp=f, indent=2)
+        table_file = data_dir / 'region_tables.json'
+        table_names_to_file(schema_glb, table_file)
 
     curr_dir = Path(__file__).parent.resolve()
     global_tables = load_tables_names(curr_dir / 'global_tables.txt')
