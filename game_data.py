@@ -139,7 +139,7 @@ def main():
         save_tables(data_dir, 'global', global_res)
 
     if region_tables:
-        region_res = dump_tables(region_host, region_module, region_tables, auth)
+        region_res = dump_tables(global_host, 'bitcraft-global', region_tables, auth)
         save_tables(data_dir, 'region', region_res)
 
     # exceptions get raised all the way, so if we're here, it should be successful
