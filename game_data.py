@@ -128,7 +128,7 @@ def main():
         with open(data_dir / 'schema.json', 'w') as f:
             json.dump(schema, fp=f, indent=2)
         table_file = data_dir / 'region_tables.json'
-        table_names_to_file(schema_glb, table_file)
+        table_names_to_file(schema, table_file)
 
     curr_dir = Path(__file__).parent.resolve()
     global_tables = load_tables_names(curr_dir / 'global_tables.txt')
